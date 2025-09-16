@@ -1,0 +1,7 @@
+node_modules/
+dist/*.map
+src/styles/*.css
+src/styles/*.map
+.DS_Store
+.idea
+Thumbs.db

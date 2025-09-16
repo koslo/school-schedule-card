@@ -1,0 +1,280 @@
+:host {
+  display: block;
+}
+
+ha-card {
+  padding: 12px;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: stretch;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 480px) {
+  .school-schedule-card {
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+// for complete responsive grid
+// .grid { display: grid; grid-template-columns: repeat(5, minmax(200px, 1fr)); gap: 16px; overflow: auto; align-items: start; }
+// @media (max-width: 1200px) { .grid { grid-template-columns: repeat(3, minmax(240px, 1fr)); } }
+// @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+// @media (max-width: 560px) { .grid { grid-template-columns: repeat(1, minmax(260px, 1fr)); } }
+
+.school-schedule-card {
+  background: var(--ha-card-background, var(--card-background-color));
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin: 0;
+  box-shadow: var(--ha-card-box-shadow, 0 4px 12px rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.2));
+  flex: 0 0 300px;
+  min-width: 280px;
+
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--divider-color);
+
+    .day-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin-bottom: 4px;
+    }
+
+    .date {
+      font-size: 16px;
+      color: var(--secondary-text-color);
+      font-weight: 400;
+    }
+
+    .updated-date {
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+  }
+
+  .lessons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .lesson {
+      padding: 12px;
+      position: relative;
+      background: color-mix(in oklab, var(--card-background-color), white 6%);
+      border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.08));
+      border-radius: 12px;
+      box-shadow: var(--ha-card-box-shadow, 0 1px 3px rgba(0, 0, 0, 0.08));
+      transition: box-shadow .12s ease, transform .12s ease, border-color .12s ease;
+      border-left: 4px solid var(--accent, var(--primary-color));
+
+      &:hover {
+        background: color-mix(in oklab, var(--card-background-color), white 9%);
+        transform: translateY(-1px);
+      }
+
+      .lesson-main-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+
+        .lesson-number {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 14px;
+          margin-right: 12px;
+          flex-shrink: 0;
+          border: 1px solid var(--accent, var(--primary-color))
+        }
+
+        .lesson-content {
+          flex: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+
+          .lesson-details {
+            text-align: right;
+
+            .time {
+              font-size: 10px;
+              color: var(--secondary-text-color);
+              margin-bottom: 2px;
+            }
+
+            .room {
+              font-size: 14px;
+              color: var(--primary-text-color);
+              font-weight: 500;
+            }
+          }
+
+          .lesson-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .subject-teacher {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+
+              .subject {
+                background: var(--chip-background-color, color-mix(in oklab, var(--primary-color), var(--card-background-color) 70%));
+                color: var(--primary-text-color);
+                padding: 6px 12px;
+                border-radius: 14px;
+                font-size: 14px;
+                font-weight: 600;
+                min-width: 50px;
+                text-align: center;
+
+                &.changed {
+                  background: var(--error-color) !important;
+                  color: var(--primary-text-color) !important;
+                }
+              }
+
+              .teacher {
+                font-size: 16px;
+                color: var(--primary-text-color);
+                font-weight: 600;
+
+                &.changed {
+                  color: var(--error-color) !important;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .substitution-info {
+        background: color-mix(in oklab, var(--warning-color, #ff9800), transparent 80%);
+        color: var(--warning-color, #ff9800);
+        padding: 2px 6px;
+        margin-top: 4px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 400;
+        border: 1px solid color-mix(in oklab, var(--warning-color, #ff9800), transparent 60%);
+      }
+    }
+  }
+
+  &.dense {
+    border: none;
+    padding: 0 6px;
+    margin: 0 auto;
+    box-shadow: none;
+
+    .lesson {
+      padding: 5px 10px;
+    }
+
+    .daily-notes {
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+
+    .note-item {
+      padding: 5px 10px;
+    }
+
+    .notes-title {
+      margin-bottom: 8px;
+    }
+
+    .notes-list {
+      gap: 6px
+    }
+
+    .header {
+      margin-bottom: 10px;
+    }
+
+    .day-title {
+      margin-bottom: 0;
+    }
+
+    .updated-date {
+      margin-bottom: 0;
+    }
+
+    .lessons-container {
+      gap: 8px;
+    }
+  }
+}
+
+.daily-notes {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--divider-color);
+
+  .notes-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-text-color);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .notes-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--info-color, var(--primary-color));
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-primary-color-on-primary, #fff);
+      font-weight: bold;
+    }
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .note-item {
+      background: var(--ha-card-background, var(--card-background-color));
+      padding: 10px 12px;
+      border-radius: 6px;
+      border-left: 3px solid var(--info-color, var(--primary-color));
+      font-size: 13px;
+      line-height: 1.4;
+
+      &.warning {
+        border-left-color: var(--warning-color, #ff9800);
+        background: color-mix(in oklab, var(--warning-color, #ff9800), transparent 85%);
+      }
+
+      &.info {
+        border-left-color: var(--info-color, var(--primary-color));
+        background: color-mix(in oklab, var(--info-color, var(--primary-color)), transparent 85%);
+      }
+    }
+  }
+}

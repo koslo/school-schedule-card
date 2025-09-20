@@ -135,6 +135,10 @@ export class SchoolScheduleCard extends HTMLElement {
         const cfg = this._config || DEFAULTS
         const {show_date, show_footer_hints, view, tomorrow_after, dense} = cfg
 
+        if (view === 'week') {
+            this._card.setAttribute('style', 'background: none;')
+        }
+
         // styles
         this._style.textContent = styles
         const days = this._parseData()
@@ -194,7 +198,7 @@ export class SchoolScheduleCard extends HTMLElement {
             return
         }
 
-        const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense})
+        const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view})
         this._container.innerHTML = `${contentHtml}`
     }
 }

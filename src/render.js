@@ -55,8 +55,12 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
     const notesHtml =
         show_footer_hints && notes && notes.length
             ? `
-        <div class="daily-notes">
-          ${!dense ? `<div class="notes-title"><div class="notes-icon">i</div>Tägliche Hinweise</div>` : ''}
+        <div class="daily-notes collapsed">
+          <div class="notes-title" role="button" tabindex="0" aria-expanded="false">
+            <ha-icon icon="mdi:information-box-outline" class="notes-icon"></ha-icon>
+            <span class="notes-text">Tägliche Hinweise</span>
+            <ha-icon icon="mdi:chevron-down" class="notes-arrow"></ha-icon>
+          </div>
           <div class="notes-list">
             ${notes.map((n) => `<div class="note-item ${classifyNote(n)}">${n}</div>`).join('')}
           </div>

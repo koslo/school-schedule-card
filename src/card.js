@@ -60,6 +60,7 @@ export class SchoolScheduleCard extends HTMLElement {
         const prevScrollLeft = prevGrid ? prevGrid.scrollLeft : 0
 
         this._render()
+        this._wireNotesToggle()
 
         const newGrid = this._container ? this._container.querySelector('.grid') : null
         if (newGrid && prevScrollLeft) {
@@ -192,6 +193,7 @@ export class SchoolScheduleCard extends HTMLElement {
                 show_date,
                 show_footer_hints,
                 dense,
+                view
             })
             const gridHtml = `<div class="grid">${days.map(renderOne).join('')}</div>`
             this._container.innerHTML = `${gridHtml}`
@@ -200,5 +202,39 @@ export class SchoolScheduleCard extends HTMLElement {
 
         const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view})
         this._container.innerHTML = `${contentHtml}`
+    }
+
+    _wireNotesToggle() {
+        const cfg = this._config || DEFAULTS
+        const {view} = cfg
+        if (!this._container) return
+        const wrappers = this._container.querySelectorAll('.daily-notes')
+        wrappers.forEach((wrap) => {
+            const title = wrap.querySelector('.notes-title')
+            const list = wrap.querySelector('.notes-list')
+            if (!title || !list) return
+            // remove previous listeners by cloning
+            const newTitle = title.cloneNode(true)
+            title.replaceWith(newTitle)
+
+            const setState = (expanded) => {
+                wrap.classList.toggle('expanded', expanded)
+                wrap.classList.toggle('collapsed', !expanded)
+                newTitle.setAttribute('aria-expanded', expanded ? 'true' : 'false')
+            }
+            setState(view === 'week')
+
+            const onActivate = (ev) => {
+                if (ev && ev.type === 'keydown') {
+                    const key = ev.key
+                    if (key !== 'Enter' && key !== ' ' && key !== 'Spacebar') return
+                    ev.preventDefault()
+                }
+                const isExpanded = wrap.classList.contains('expanded')
+                setState(!isExpanded)
+            }
+            newTitle.addEventListener('click', onActivate)
+            newTitle.addEventListener('keydown', onActivate)
+        })
     }
 }

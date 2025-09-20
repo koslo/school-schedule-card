@@ -69,16 +69,20 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
 
     const headerHtml = dense ?
         `<div class="header">
-            <div class="header-day">
+            <div>
                 <span class="day-title">${dobj.name || (dobj.date ? parseYmdToLocalDate(dobj.date)?.toLocaleDateString(undefined, {weekday: 'long'}) : '')}</span>
-                ${show_date ? `<span class="date">${dayDate}</span>` : ''}
-            </div>            
-            ${dobj.updated_at ? `<div class="date updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
+            </div>
+            <div>
+                ${show_date ? `<div class="date">${dayDate}</div>` : ''}
+                ${dobj.updated_at ? `<div class="updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
+            </div>
           </div>` :
         `<div class="header">
-            <div class="day-title">${dobj.name || (dobj.date ? parseYmdToLocalDate(dobj.date)?.toLocaleDateString(undefined, {weekday: 'long'}) : '')}</div>
-            ${show_date ? `<div class="date">${dayDate}</div>` : ''}
-            ${dobj.updated_at ? `<div class="date updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
+            <div class="header-left"><div class="day-title">${dobj.name || (dobj.date ? parseYmdToLocalDate(dobj.date)?.toLocaleDateString(undefined, {weekday: 'long'}) : '')}</div></div>
+            <div class="header-right">
+              ${show_date ? `<div class="date">${dayDate}</div>` : ''}
+              ${dobj.updated_at ? `<div class="date updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
+            </div>
           </div>`
 
     return `

@@ -41,33 +41,30 @@ ha-card {
   min-width: 280px;
 
   .header {
-    text-align: center;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 5px 5px 10px;
     margin-bottom: 12px;
     border-bottom: 1px solid var(--divider-color);
-
-    .header-day {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
 
     .day-title {
       font-size: 24px;
       font-weight: 600;
       color: var(--primary-text-color);
-      margin-bottom: 4px;
     }
 
     .date {
       font-size: 16px;
-      color: var(--secondary-text-color);
       font-weight: 400;
+      text-align: right;
     }
 
     .updated-date {
       font-size: 14px;
-      text-align: center;
-      margin-bottom: 12px;
+      color: var(--secondary-text-color);
+      text-align: right;
+      margin: 0;
     }
   }
 
@@ -210,10 +207,6 @@ ha-card {
 
     .notes-list {
       gap: 6px
-    }
-
-    .header {
-      margin-bottom: 10px;
     }
 
     .updated-date {

@@ -35,7 +35,7 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
                 </div>
                 <div class="lesson-details">
                   <div class="time">${l.time || ''}${l.end ? ' – ' + l.end : ''}</div>
-                  ${l.room ? `<div class="room">${l.room}</div>` : ''}
+                  ${l.room ? `<div class="room ${l.roomChanged ? 'changed' : ''}">${l.room}</div>` : ''}
                 </div>
               </div>
             </div>

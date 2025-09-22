@@ -47,6 +47,7 @@ export function normalizeLessons(list) {
             teacher: teach.text,
             teacherChanged: teach.changed,
             room: room.text,
+            roomChanged: room.changed,
             info: infoStr,
             isCourse: isCourse,
             isSubstitution: isSubstitution,

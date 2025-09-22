@@ -127,6 +127,10 @@ ha-card {
               font-size: 14px;
               color: var(--primary-text-color);
               font-weight: 500;
+
+              &.changed {
+                color: var(--error-color) !important;
+              }
             }
           }
 

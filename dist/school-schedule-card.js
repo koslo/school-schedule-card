@@ -281,7 +281,6 @@ ha-card {
 .daily-notes .notes-list .note-item {
   background: var(--ha-card-background, var(--card-background-color));
   padding: 10px 12px;
-  margin-bottom: 6px;
   border-radius: 6px;
   border-left: 3px solid var(--info-color, var(--primary-color));
   font-size: 13px;

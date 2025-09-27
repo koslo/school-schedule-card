@@ -1,5 +1,5 @@
 import {SUBJECT_COLORS} from './constants.js'
-import {formatDateStr, normalizeHints, parseYmdToLocalDate} from './utils.js'
+import {formatDateStr, parseYmdToLocalDate} from './utils.js'
 
 export function subjectStyle(subject) {
     const key = (subject || '').trim()
@@ -17,7 +17,8 @@ export function subjectAccent(subject) {
 export function renderDayContent({dobj, show_date, show_footer_hints, dense, view}) {
     const dayDate = dobj.date ? formatDateStr(dobj.date) : ''
     const lessons = Array.isArray(dobj.lessons) ? dobj.lessons : []
-    const lessonsHtml = lessons.length
+    const hasLessons = lessons.length > 0
+    const lessonsHtml = hasLessons
         ? lessons
             .map((l) => {
                 const sub = !!l.isSubstitution
@@ -43,17 +44,18 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
           </div>`
             })
             .join('')
-        : ''
+        : `<div class="no-lessons">Keine Stunden</div>`
 
-    const notes = normalizeHints(dobj.hints)
+    const notes = dobj.hints
     const classifyNote = (t) => {
         const s = (t || '').toLowerCase()
         if (s.includes('gesperrt') || s.includes('achtung') || s.includes('warnung')) return 'warning'
-        if (s.includes('klassenarbeit') || s.includes('prüfung')) return 'info'
+        if (s.includes('klassenarbeit') || s.includes('prüfung') || s.includes('klausur')) return 'info'
         return ''
     }
+    const hasNotes = Array.isArray(notes) && notes.length > 0
     const notesHtml =
-        show_footer_hints && notes && notes.length
+        show_footer_hints && hasLessons
             ? `
         <div class="daily-notes collapsed">
           <div class="notes-title" role="button" tabindex="0" aria-expanded="false">
@@ -62,7 +64,7 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
             <ha-icon icon="mdi:chevron-down" class="notes-arrow"></ha-icon>
           </div>
           <div class="notes-list">
-            ${notes.map((n) => `<div class="note-item ${classifyNote(n)}">${n}</div>`).join('')}
+            ${hasNotes ? notes.map((n) => `<div class="note-item ${classifyNote(n)}">${n}</div>`).join('') : '<div class="note-item empty">Keine Hinweise</div>'}
           </div>
         </div>`
             : ''

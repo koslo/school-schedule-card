@@ -9,6 +9,7 @@ export const DEFAULTS = {
     courses: undefined,
     hide_subjects: undefined,
     dense: false,
+    subject_colors: undefined,
 }
 
 export const SUBJECT_COLORS = {

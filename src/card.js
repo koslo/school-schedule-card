@@ -46,6 +46,7 @@ export class SchoolScheduleCard extends HTMLElement {
             hide_subjects: Array.isArray(cfg.hide_subjects)
                 ? cfg.hide_subjects.map((s) => String(s).toLowerCase().trim())
                 : undefined,
+            subject_colors: cfg.subject_colors || undefined,
         }
         return JSON.stringify({cfg: relevantCfg, days: this._parseData()})
     }
@@ -184,7 +185,7 @@ export class SchoolScheduleCard extends HTMLElement {
                 day = {name: weekday, date: toISODateLocal(targetDate), lessons: [], hints: []}
             }
 
-            const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view})
+            const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view, subject_colors: cfg.subject_colors})
             this._container.innerHTML = `${contentHtml}`
         } else {
             const monday = getMondayOfLocalWeek(targetDate)
@@ -211,7 +212,8 @@ export class SchoolScheduleCard extends HTMLElement {
                 show_date,
                 show_footer_hints,
                 dense,
-                view
+                view,
+                subject_colors: cfg.subject_colors,
             })
             const gridHtml = `<div class="grid">${toRender.map(renderOne).join('')}</div>`
             this._container.innerHTML = `${gridHtml}`

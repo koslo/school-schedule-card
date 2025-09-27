@@ -84,6 +84,20 @@ hide_subjects:
   - sport
 ```
 
+Configure subject colors via config (override defaults):
+```yaml
+type: custom:school-schedule-card
+entity: sensor.your_schedule_sensor
+subject_colors:
+  Mat: { bg: '#0000ff', fg: '#ffffff' }
+  Deu: { bg: '#ff00ff', fg: '#000000' }
+  Bio:
+    bg: '#228B22'
+    fg: '#ffffff'
+  # Keys must match the subject short codes used in your data (case-sensitive)
+```
+If a subject is not present in subject_colors, the built-in default colors are used.
+
 Inline data instead of entity (highest priority):
 ```yaml
 type: custom:school-schedule-card

@@ -1,20 +1,23 @@
 import {SUBJECT_COLORS} from './constants.js'
 import {formatDateStr, parseYmdToLocalDate} from './utils.js'
 
-export function subjectStyle(subject) {
+export function subjectStyle(subject, colorMap) {
     const key = (subject || '').trim()
-    const map = SUBJECT_COLORS[key]
+    const mapSrc = colorMap && typeof colorMap === 'object' ? {...SUBJECT_COLORS, ...colorMap} : SUBJECT_COLORS
+    const map = mapSrc[key]
     if (map) return `background:${map.bg};color:${map.fg}`
     return ''
 }
 
-export function subjectAccent(subject) {
+export function subjectAccent(subject, colorMap) {
     const key = (subject || '').trim()
-    const map = SUBJECT_COLORS[key]
+    const mapSrc = colorMap && typeof colorMap === 'object' ? {...SUBJECT_COLORS, ...colorMap} : SUBJECT_COLORS
+    const map = mapSrc[key]
     return map ? map.bg : 'var(--primary-color)'
 }
 
-export function renderDayContent({dobj, show_date, show_footer_hints, dense, view}) {
+export function renderDayContent({dobj, show_date, show_footer_hints, dense, view, subject_colors}) {
+    const colorMap = subject_colors && typeof subject_colors === 'object' ? subject_colors : undefined
     const dayDate = dobj.date ? formatDateStr(dobj.date) : ''
     const lessons = Array.isArray(dobj.lessons) ? dobj.lessons : []
     const hasLessons = lessons.length > 0
@@ -24,13 +27,13 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
                 const sub = !!l.isSubstitution
                 const infoText = sub ? l.info || '' : ''
                 return `
-          <div class="lesson" style="--accent: ${subjectAccent(l.subject)}">
+          <div class="lesson" style="--accent: ${subjectAccent(l.subject, colorMap)}">
             <div class="lesson-main-content">
               <div class="lesson-number">${l.period || ''}</div>
               <div class="lesson-content">
                 <div class="lesson-info">
                   <div class="subject-teacher">
-                    <span class="subject ${l.subjectChanged ? 'changed' : ''}" style="${subjectStyle(l.subject)}">${(l.subject || '').trim()}</span>
+                    <span class="subject ${l.subjectChanged ? 'changed' : ''}" style="${subjectStyle(l.subject, colorMap)}">${(l.subject || '').trim()}</span>
                     ${l.teacher ? `<span class="teacher ${l.teacherChanged ? 'changed' : ''}">${l.teacher}</span>` : ''}
                   </div>
                 </div>
@@ -74,17 +77,22 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
             <div>
                 <span class="day-title">${dobj.name || (dobj.date ? parseYmdToLocalDate(dobj.date)?.toLocaleDateString(undefined, {weekday: 'long'}) : '')}</span>
             </div>
+            ${show_date ? `
             <div>
-                ${show_date ? `<div class="date">${dayDate}</div>` : ''}
+                <div class="date">${dayDate}</div>
                 ${dobj.updated_at ? `<div class="updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
-            </div>
+            </div>`
+            : ''}
           </div>` :
         `<div class="header">
             <div class="header-left"><div class="day-title">${dobj.name || (dobj.date ? parseYmdToLocalDate(dobj.date)?.toLocaleDateString(undefined, {weekday: 'long'}) : '')}</div></div>
+            
+            ${show_date ? `
             <div class="header-right">
-              ${show_date ? `<div class="date">${dayDate}</div>` : ''}
+              <div class="date">${dayDate}</div>
               ${dobj.updated_at ? `<div class="date updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
-            </div>
+            </div>`
+            : ''}
           </div>`
 
     return `

@@ -1,5 +1,5 @@
-import {CARD_TAG, DEFAULTS} from './constants.js'
-import {formatDateStr, inferDays, parseYmdToLocalDate, toISODateLocal} from './utils.js'
+import {DEFAULTS} from './constants.js'
+import {normalizeData, parseYmdToLocalDate, toISODateLocal, getMondayOfLocalWeek} from './utils.js'
 import {renderDayContent} from './render.js'
 import styles from './styles/styles.css'
 
@@ -47,8 +47,7 @@ export class SchoolScheduleCard extends HTMLElement {
                 ? cfg.hide_subjects.map((s) => String(s).toLowerCase().trim())
                 : undefined,
         }
-        let days = this._parseData()
-        return JSON.stringify({cfg: relevantCfg, days: days})
+        return JSON.stringify({cfg: relevantCfg, days: this._parseData()})
     }
 
     _maybeRender() {
@@ -117,7 +116,7 @@ export class SchoolScheduleCard extends HTMLElement {
         }
 
         if (cfg.schedule && Array.isArray(cfg.schedule.days)) {
-            return applyHideSubjectsFilter(applyCourseFilter(inferDays(cfg.schedule)))
+            return applyHideSubjectsFilter(applyCourseFilter(normalizeData(cfg.schedule)))
         }
 
         const entId = cfg.entity
@@ -125,7 +124,7 @@ export class SchoolScheduleCard extends HTMLElement {
             const stObj = this._hass.states[entId]
             const attrs = stObj.attributes || {}
             if (Array.isArray(attrs.days)) {
-                return applyHideSubjectsFilter(applyCourseFilter(inferDays(attrs)))
+                return applyHideSubjectsFilter(applyCourseFilter(normalizeData(attrs)))
             }
         }
         return []
@@ -144,33 +143,30 @@ export class SchoolScheduleCard extends HTMLElement {
         this._style.textContent = styles
         const days = this._parseData()
         let day
-        if ((view || 'week') === 'day') {
-            const parseCutoff = (hhmm) => {
-                const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})$/)
-                const now = new Date()
-                if (!m) return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-                const hh = Math.max(0, Math.min(23, parseInt(m[1], 10)))
-                const mm = Math.max(0, Math.min(59, parseInt(m[2], 10)))
-                return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0)
-            }
+        let targetDate
+
+        const parseCutoff = (hhmm) => {
+            const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})$/)
             const now = new Date()
-            const cutoff = parseCutoff(tomorrow_after)
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-            const weekday = (today.getDay() + 6) % 7
+            if (!m) return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+            const hh = Math.max(0, Math.min(23, parseInt(m[1], 10)))
+            const mm = Math.max(0, Math.min(59, parseInt(m[2], 10)))
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0)
+        }
+        const now = new Date()
+        const cutoff = parseCutoff(tomorrow_after)
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const weekday = (today.getDay() + 6) % 7
 
-            let targetDate
-            if (
-                weekday === 5 ||
-                weekday === 6 ||
-                (weekday === 4 && now >= cutoff)
-            ) {
-                targetDate = new Date(today.getTime() + (7 - weekday) * 86400000)
-            } else if (now >= cutoff) {
-                targetDate = new Date(today.getTime() + 86400000)
-            } else {
-                targetDate = today
-            }
+        if (weekday === 5 || weekday === 6 || (weekday === 4 && now >= cutoff)) {
+            targetDate = new Date(today.getTime() + (7 - weekday) * 86400000)
+        } else if (now >= cutoff) {
+            targetDate = new Date(today.getTime() + 86400000)
+        } else {
+            targetDate = today
+        }
 
+        if ((view || 'week') === 'day') {
             const byDate = (arr, dt) =>
                 arr.find((d) => {
                     if (!d.date) return false
@@ -187,7 +183,29 @@ export class SchoolScheduleCard extends HTMLElement {
                 const weekday = targetDate.toLocaleDateString(undefined, {weekday: 'long'})
                 day = {name: weekday, date: toISODateLocal(targetDate), lessons: [], hints: []}
             }
+
+            const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view})
+            this._container.innerHTML = `${contentHtml}`
         } else {
+            const monday = getMondayOfLocalWeek(targetDate)
+            const sunday = new Date(monday.getTime() + 6 * 86400000)
+
+            const inWeek = (d) => {
+                if (!d.date) return false
+                const dd = parseYmdToLocalDate(d.date)
+                if (!dd || isNaN(dd.getTime())) return false
+                dd.setHours(0, 0, 0, 0)
+                return dd >= monday && dd <= sunday
+            }
+
+            const weekDays = days.filter(inWeek).sort((a, b) => {
+                const da = parseYmdToLocalDate(a.date)?.getTime() || 0
+                const db = parseYmdToLocalDate(b.date)?.getTime() || 0
+                return da - db
+            })
+
+            const toRender = weekDays.length > 0 ? weekDays : days
+
             const renderOne = (dobj) => renderDayContent({
                 dobj,
                 show_date,
@@ -195,13 +213,9 @@ export class SchoolScheduleCard extends HTMLElement {
                 dense,
                 view
             })
-            const gridHtml = `<div class="grid">${days.map(renderOne).join('')}</div>`
+            const gridHtml = `<div class="grid">${toRender.map(renderOne).join('')}</div>`
             this._container.innerHTML = `${gridHtml}`
-            return
         }
-
-        const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view})
-        this._container.innerHTML = `${contentHtml}`
     }
 
     _wireNotesToggle() {

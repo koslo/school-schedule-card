@@ -88,108 +88,42 @@ export function normalizeHints(input) {
     return []
 }
 
-export function inferDays(data) {
+export function normalizeData(data) {
     if (!data) return []
     if (typeof data === 'string') {
         const p = tryJsonParse(data)
         if (p) data = p
     }
-    if (isObject(data) && Array.isArray(data.days)) {
-        const rawDays = (data.days || []).map((d) => ({
-            name: d.name ?? undefined,
-            date: d.date ?? undefined,
-            lessons: normalizeLessons(d.lessons ?? []),
-            hints: normalizeHints(d.hints),
-            updated_at: d.updated_at ?? d.updatedAt ?? d.last_update ?? undefined,
-        }))
-
-        const weekdayIndex = (obj) => {
-            if (obj && obj.date) {
-                const dt = parseYmdToLocalDate(obj.date)
-                if (!isNaN(dt)) {
-                    const w = dt.getDay()
-                    return w === 0 ? 7 : w
-                }
-            }
-            const nm = (obj && obj.name ? String(obj.name) : '').toLowerCase()
-            const map = {
-                montag: 1,
-                mo: 1,
-                monday: 1,
-                mon: 1,
-                dienstag: 2,
-                di: 2,
-                tuesday: 2,
-                tue: 2,
-                tues: 2,
-                mittwoch: 3,
-                mi: 3,
-                wednesday: 3,
-                wed: 3,
-                donnerstag: 4,
-                do: 4,
-                thursday: 4,
-                thu: 4,
-                thur: 4,
-                thurs: 4,
-                freitag: 5,
-                fr: 5,
-                friday: 5,
-                fri: 5,
-                samstag: 6,
-                sa: 6,
-                saturday: 6,
-                sat: 6,
-                sonntag: 7,
-                so: 7,
-                sunday: 7,
-                sun: 7,
-            }
-            return map[nm] || undefined
-        }
-
-        const byWd = new Map()
-        for (const d of rawDays) {
-            const wd = weekdayIndex(d)
-            if (!wd) continue
-            const prev = byWd.get(wd)
-            if (!prev) {
-                byWd.set(wd, d)
-                continue
-            }
-            const hasDatePrev = !!prev.date
-            const hasDateNew = !!d.date
-            byWd.set(wd, hasDateNew && !hasDatePrev ? d : prev)
-        }
-
-        const firstDated = rawDays.find((x) => x.date && parseYmdToLocalDate(x.date))
-        const refDate = firstDated ? parseYmdToLocalDate(firstDated.date) : new Date()
-        const monday = getMondayOfLocalWeek(refDate)
-
-        const weekdayNames = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag']
-        const result = []
-        for (let i = 0; i < 5; i++) {
-            const wd = i + 1
-            const base = byWd.get(wd)
-            const dayDate = new Date(monday)
-            dayDate.setDate(monday.getDate() + i)
-            const iso = toISODateLocal(dayDate)
-            if (base) {
-                result.push({
-                    name: base.name ?? weekdayNames[i],
-                    date: base.date ? toISODateLocal(parseYmdToLocalDate(base.date)) : iso,
-                    lessons: Array.isArray(base.lessons) ? base.lessons : [],
-                    hints: normalizeHints(base.hints),
-                    updated_at: base.updated_at ?? undefined,
-                })
-            } else {
-                result.push({name: weekdayNames[i], date: iso, lessons: [], hints: []})
-            }
-        }
-
-        return result
+    if (!isObject(data) || !Array.isArray(data.days)) {
+        return []
     }
-    return []
+
+    const firstDated = data.days.find((x) => x.date && parseYmdToLocalDate(x.date))
+    const refDate = firstDated ? parseYmdToLocalDate(firstDated.date) : new Date()
+    const monday = getMondayOfLocalWeek(refDate)
+
+    const result = []
+    for (let i = 0; i < 5; i++) {
+        const base = (data.days || [])[i]
+        const dayDate = new Date(monday)
+        dayDate.setDate(monday.getDate() + i)
+        const iso = toISODateLocal(dayDate)
+        const weekdayName = dayDate.toLocaleDateString('de-DE', {weekday: 'long'})
+
+        if (base) {
+            result.push({
+                name: base.name ?? weekdayName,
+                date: base.date ? toISODateLocal(parseYmdToLocalDate(base.date)) : iso,
+                lessons: normalizeLessons(base.lessons ?? []),
+                hints: normalizeHints(base.hints),
+                updated_at: base.updated_at ?? base.updatedAt ?? base.last_update ?? undefined,
+            })
+        } else {
+            result.push({name: weekdayName, date: iso, lessons: [], hints: []})
+        }
+    }
+
+    return result
 }
 
 export function formatDateStr(dateStr) {

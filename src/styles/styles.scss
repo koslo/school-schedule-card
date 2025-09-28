@@ -2,11 +2,18 @@
   display: block;
 }
 
-ha-card {
-  padding: 12px;
+ssc-day-card {
+  --ha-card-border-radius: 12px;
+
+  &.view-day {
+    ha-card {
+      padding: 12px;
+    }
+  }
 }
 
 .grid {
+  padding: 12px;
   display: flex;
   flex-wrap: nowrap;
   gap: 16px;
@@ -31,9 +38,7 @@ ha-card {
 // @media (max-width: 560px) { .grid { grid-template-columns: repeat(1, minmax(260px, 1fr)); } }
 
 .school-schedule-card {
-  background: var(--ha-card-background, var(--card-background-color));
-  border-radius: 12px;
-  padding: 10px 15px;
+  padding: 10px 12px;
   margin: 0;
   box-shadow: var(--ha-card-box-shadow, 0 4px 12px rgba(0, 0, 0, 0.3));
   border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.2));
@@ -187,10 +192,6 @@ ha-card {
     }
   }
 
-  &.view-day {
-    background: none;
-  }
-
   &.dense {
     border: none;
     padding: 0 6px;
@@ -249,10 +250,15 @@ ha-card {
   }
 
   &.collapsed {
-    .notes-arrow { transform: rotate(-90deg); }
+    .notes-arrow {
+      transform: rotate(-90deg);
+    }
   }
+
   &.expanded {
-    .notes-arrow { transform: rotate(0deg); }
+    .notes-arrow {
+      transform: rotate(0deg);
+    }
   }
 
   .notes-list {

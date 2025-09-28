@@ -1,18 +1,21 @@
 {
   "name": "school-schedule-card",
-  "version": "0.1.0",
+  "version": "1.1.5",
   "description": "Home Assistant Lovelace card to display a school schedule. HACS-ready.",
   "type": "module",
   "scripts": {
-    "build:css": "sass src/styles/styles.scss src/styles/styles.css",
-    "build:js": "esbuild src/main.js --bundle --minify --format=esm --outfile=dist/school-schedule-card.js --loader:.css=text",
+    "build:css": "sass --no-source-map src/styles/styles.scss src/styles/styles.css",
+    "build:js": "esbuild src/main.ts --bundle --minify --format=esm --outfile=dist/school-schedule-card.js --loader:.css=text --loader:.json=json",
     "build": "npm run build:css && npm run build:js",
-    "watch:css": "sass --watch src/styles/styles.scss src/styles/styles.css",
-    "watch:js": "esbuild src/main.js --bundle --format=esm --outfile=dist/school-schedule-card.js --loader:.css=text --watch",
+    "watch:css": "sass --no-source-map --watch src/styles/styles.scss src/styles/styles.css",
+    "watch:js": "esbuild src/main.ts --bundle --format=esm --outfile=dist/school-schedule-card.js --loader:.css=text --loader:.json=json --watch",
     "watch": "start /B npm run watch:css & npm run watch:js"
   },
   "devDependencies": {
     "esbuild": "^0.21.5",
     "sass": "^1.77.0"
+  },
+  "dependencies": {
+    "lit": "^3.1.0"
   }
 }

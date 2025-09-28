@@ -2,6 +2,7 @@ import {DEFAULTS} from './constants.js'
 import {normalizeData, parseYmdToLocalDate, toISODateLocal, getMondayOfLocalWeek} from './utils.js'
 import {renderDayContent} from './render.js'
 import styles from './styles/styles.css'
+import {createTranslator, getLanguageFromHass} from './i18n.js'
 
 export class SchoolScheduleCard extends HTMLElement {
     setConfig(config) {
@@ -16,12 +17,16 @@ export class SchoolScheduleCard extends HTMLElement {
             this._card.appendChild(this._container)
             this._root.appendChild(this._card)
         }
+        // initialize i18n (no hass yet -> default 'en')
+        if (!this._lang) this._lang = 'en'
+        this._t = createTranslator(this._lang)
         // Render placeholder if no hass yet
         if (!this._hass) {
             this._style.textContent = styles
+            const t = this._t
             this._container.innerHTML = `<div class="school-schedule-card"><div class="header"><div class="day-title">${
-                this._config.title || 'Stundenplan'
-            }</div><div class="date">Wird geladen …</div></div></div>`
+                this._config.title || t('card_title')
+            }</div><div class="date">${t('loading')}</div></div></div>`
         }
         this._lastDataSig = undefined
         this._maybeRender()
@@ -29,6 +34,13 @@ export class SchoolScheduleCard extends HTMLElement {
 
     set hass(hass) {
         this._hass = hass
+        // detect language and update translator
+        const newLang = getLanguageFromHass(hass)
+        if (newLang && newLang !== this._lang) {
+            this._lang = newLang
+            this._t = createTranslator(newLang)
+            this._lastDataSig = undefined // force rerender on language change
+        }
         this._maybeRender()
     }
 
@@ -48,7 +60,7 @@ export class SchoolScheduleCard extends HTMLElement {
                 : undefined,
             subject_colors: cfg.subject_colors || undefined,
         }
-        return JSON.stringify({cfg: relevantCfg, days: this._parseData()})
+        return JSON.stringify({cfg: relevantCfg, days: this._parseData(), lang: this._lang || 'en'})
     }
 
     _maybeRender() {
@@ -185,7 +197,7 @@ export class SchoolScheduleCard extends HTMLElement {
                 day = {name: weekday, date: toISODateLocal(targetDate), lessons: [], hints: []}
             }
 
-            const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view, subject_colors: cfg.subject_colors})
+            const contentHtml = renderDayContent({dobj: day, show_date, show_footer_hints, dense, view, subject_colors: cfg.subject_colors, t: this._t})
             this._container.innerHTML = `${contentHtml}`
         } else {
             const monday = getMondayOfLocalWeek(targetDate)
@@ -214,6 +226,7 @@ export class SchoolScheduleCard extends HTMLElement {
                 dense,
                 view,
                 subject_colors: cfg.subject_colors,
+                t: this._t,
             })
             const gridHtml = `<div class="grid">${toRender.map(renderOne).join('')}</div>`
             this._container.innerHTML = `${gridHtml}`

@@ -16,7 +16,7 @@ export function subjectAccent(subject, colorMap) {
     return map ? map.bg : 'var(--primary-color)'
 }
 
-export function renderDayContent({dobj, show_date, show_footer_hints, dense, view, subject_colors}) {
+export function renderDayContent({dobj, show_date, show_footer_hints, dense, view, subject_colors, t}) {
     const colorMap = subject_colors && typeof subject_colors === 'object' ? subject_colors : undefined
     const dayDate = dobj.date ? formatDateStr(dobj.date) : ''
     const lessons = Array.isArray(dobj.lessons) ? dobj.lessons : []
@@ -47,7 +47,7 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
           </div>`
             })
             .join('')
-        : `<div class="no-lessons">Keine Stunden</div>`
+        : `<div class="no-lessons">${t('no_lessons')}</div>`
 
     const notes = dobj.hints
     const classifyNote = (t) => {
@@ -63,11 +63,11 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
         <div class="daily-notes collapsed">
           <div class="notes-title" role="button" tabindex="0" aria-expanded="false">
             <ha-icon icon="mdi:information-box-outline" class="notes-icon"></ha-icon>
-            <span class="notes-text">Tägliche Hinweise</span>
+            <span class="notes-text">${t('daily_notes')}</span>
             <ha-icon icon="mdi:chevron-down" class="notes-arrow"></ha-icon>
           </div>
           <div class="notes-list">
-            ${hasNotes ? notes.map((n) => `<div class="note-item ${classifyNote(n)}">${n}</div>`).join('') : '<div class="note-item empty">Keine Hinweise</div>'}
+            ${hasNotes ? notes.map((n) => `<div class="note-item ${classifyNote(n)}">${n}</div>`).join('') : `<div class="note-item empty">${t('no_notes')}</div>`}
           </div>
         </div>`
             : ''
@@ -80,7 +80,7 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
             ${show_date ? `
             <div>
                 <div class="date">${dayDate}</div>
-                ${dobj.updated_at ? `<div class="updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
+                ${dobj.updated_at ? `<div class="updated-date" title="${t('last_update_title')}">${t('last_update_prefix')} ${dobj.updated_at}</div>` : ''}
             </div>`
             : ''}
           </div>` :
@@ -90,7 +90,7 @@ export function renderDayContent({dobj, show_date, show_footer_hints, dense, vie
             ${show_date ? `
             <div class="header-right">
               <div class="date">${dayDate}</div>
-              ${dobj.updated_at ? `<div class="date updated-date" title="Letzte Aktualisierung">Stand: ${dobj.updated_at}</div>` : ''}
+              ${dobj.updated_at ? `<div class="date updated-date" title="${t('last_update_title')}">${t('last_update_prefix')} ${dobj.updated_at}</div>` : ''}
             </div>`
             : ''}
           </div>`

@@ -191,6 +191,15 @@ Weekday detection: If the date is missing, the weekday is derived from the name 
 
 ---
 
+## Internationalization (i18n)
+The card now supports multiple languages. It automatically follows your Home Assistant language (hass.language or hass.locale.language).
+
+- Supported languages: en, de
+- How it works: A lightweight translator is used in the card. When HA language changes, the card re-renders with the appropriate strings (e.g., "No lessons", "Daily notes", "Last update").
+- Configuration: No additional configuration is required. You can still set a custom title via the `title` option to override the default localized header shown in the initial placeholder.
+
+If you want to contribute another language, add translations to `src/i18n.js` and create a PR.
+
 ## Project structure
 - `src/` – Modularized source code
   - `constants.js` – CARD_TAG, defaults, color table

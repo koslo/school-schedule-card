@@ -5,7 +5,7 @@ if (!window.customCards) window.customCards = []
 window.customCards.push({
     type: CARD_TAG,
     name: 'School Schedule Card',
-    description: 'Moderne, responsive Stundenplan-Karte für Home Assistant.',
+    description: 'Modern, responsive schedule card for Home Assistant.',
 })
 
 if (!customElements.get(CARD_TAG)) {

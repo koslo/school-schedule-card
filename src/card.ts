@@ -17,6 +17,7 @@ export class SchoolScheduleCard extends LitElement {
   @state() private _t = createTranslator('en')
   @state() private _lastDataSig?: string
 
+
   static styles = css`${unsafeCSS(stylesText)}`
 
   static getConfigElement() {
@@ -123,6 +124,40 @@ export class SchoolScheduleCard extends LitElement {
     return []
   }
 
+  protected firstUpdated(): void {
+    // Only scroll once on initial render to allow horizontal swiping afterwards
+    this.updateComplete.then(() => this._scrollToCurrentDayIfOverflow())
+  }
+
+
+  private _scrollToCurrentDayIfOverflow(): void {
+    try {
+      if ((this._config?.view || 'week') !== 'week') return
+      const grid = this.renderRoot?.querySelector('.grid') as HTMLElement | null
+      if (!grid) return
+      const overflow = grid.scrollWidth > grid.clientWidth + 4
+      if (!overflow) return
+      const target = grid.querySelector('ssc-day-card.is-target') as HTMLElement | null
+      if (!target) return
+      const left = target.offsetLeft
+      const right = left + target.offsetWidth
+      const viewLeft = grid.scrollLeft
+      const viewRight = viewLeft + grid.clientWidth
+      let newLeft = grid.scrollLeft
+      if (left < viewLeft) {
+        newLeft = left - 8
+      } else if (right > viewRight) {
+        newLeft = right - grid.clientWidth + 8
+      } else {
+        // already fully visible
+        return
+      }
+      grid.scrollTo({ left: Math.max(0, newLeft), behavior: 'smooth' })
+    } catch {
+      // no-op
+    }
+  }
+
   protected render() {
     // prevent excessive renders by comparing signature
     const sig = this._getDataSignature()
@@ -206,11 +241,13 @@ export class SchoolScheduleCard extends LitElement {
 
       const toRender = weekDays.length > 0 ? weekDays : days
 
+      const targetISO = toISODateLocal(targetDate)
       return html`
         <div class="grid">
           ${toRender.map(
             (dobj) => html`<ssc-day-card
-              class="view-${view}"
+              class="view-${view} ${dobj.date === targetISO ? 'is-target' : ''}"
+              data-date="${dobj.date || ''}"
               .dobj=${dobj}
               .show_date=${show_date}
               .show_footer_hints=${show_footer_hints}

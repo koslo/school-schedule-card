@@ -4,6 +4,8 @@
 
 ssc-day-card {
   --ha-card-border-radius: 12px;
+  flex: 0 0 340px;
+  min-width: 280px;
 
   &.view-day {
     ha-card {
@@ -42,8 +44,6 @@ ssc-day-card {
   margin: 0;
   box-shadow: var(--ha-card-box-shadow, 0 4px 12px rgba(0, 0, 0, 0.3));
   border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.2));
-  flex: 0 0 300px;
-  min-width: 280px;
 
   .header {
     display: flex;

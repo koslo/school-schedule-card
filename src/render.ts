@@ -37,7 +37,7 @@ export function renderDayContent(args: {
   `
 
   return html`
-    <div class="school-schedule-card ${dense ? 'dense' : ''} view-${view}">
+    <div class="school-schedule-card ${dense ? 'dense' : ''}">
       ${headerHtml}
       <div class="lessons-container">${lessonsHtml}</div>
       ${notesHtml}

@@ -67,6 +67,33 @@ export function toISODateLocal(d: Date): string {
   return `${y}-${m}-${da}`
 }
 
+export function getTargetDate(tomorrow_after?: string): Date{
+    let targetDate: Date
+
+    const parseCutoff = (hhmm?: string) => {
+        const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})$/)
+        const now = new Date()
+        if (!m) return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+        const hh = Math.max(0, Math.min(23, parseInt(m[1], 10)))
+        const mm = Math.max(0, Math.min(59, parseInt(m[2], 10)))
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0)
+    }
+    const now = new Date()
+    const cutoff = parseCutoff(tomorrow_after)
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const weekday = (today.getDay() + 6) % 7
+
+    if (weekday === 5 || weekday === 6 || (weekday === 4 && now >= (cutoff as Date))) {
+        targetDate = new Date(today.getTime() + (7 - weekday) * 86400000)
+    } else if (now >= (cutoff as Date)) {
+        targetDate = new Date(today.getTime() + 86400000)
+    } else {
+        targetDate = today
+    }
+
+    return targetDate
+}
+
 export function getMondayOfLocalWeek(d: Date): Date {
   const day = d.getDay() || 7
   const m = new Date(d)
@@ -88,7 +115,7 @@ export function normalizeHints(input: string[] | string | undefined | null): str
   return []
 }
 
-export function normalizeData(data: string | DayDataRaw | { days?: DayDataRaw[] } | null | undefined): DayData[] {
+export function normalizeData(data: string | DayDataRaw | { days?: DayDataRaw[] } | null | undefined, tomorrow_after?: string): DayData[] {
   if (!data) return []
   if (typeof data === 'string') {
     const p = tryJsonParse(data)
@@ -98,17 +125,16 @@ export function normalizeData(data: string | DayDataRaw | { days?: DayDataRaw[] 
     return []
   }
 
-  const firstDated = (data as any).days.find((x: any) => x.date && parseYmdToLocalDate(x.date))
-  const refDate = firstDated ? (parseYmdToLocalDate(firstDated.date) as Date) : new Date()
-  const monday = getMondayOfLocalWeek(refDate)
+  const targetDate: Date = getTargetDate(tomorrow_after)
+  const monday = getMondayOfLocalWeek(targetDate)
 
   const result: DayData[] = []
   for (let i = 0; i < 5; i++) {
-    const base = ((data as any).days || [])[i]
     const dayDate = new Date(monday)
     dayDate.setDate(monday.getDate() + i)
     const iso = toISODateLocal(dayDate)
     const weekdayName = dayDate.toLocaleDateString('de-DE', { weekday: 'long' })
+    const base = (data as any).days.find((x: any) => x.date && x.date === iso)
 
     if (base) {
       result.push({

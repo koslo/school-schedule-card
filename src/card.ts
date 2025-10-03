@@ -5,7 +5,7 @@ import stylesText from './styles/styles.css'
 import { createTranslator, getLanguageFromHass } from './i18n'
 import './components/day-card'
 import { DayData, ScheduleConfig, HomeAssistant } from './types'
-import { getMondayOfLocalWeek, normalizeData, parseYmdToLocalDate, toISODateLocal } from './utils'
+import { getMondayOfLocalWeek, normalizeData, parseYmdToLocalDate, toISODateLocal, getTargetDate } from './utils'
 
 @customElement(CARD_TAG)
 export class SchoolScheduleCard extends LitElement {
@@ -68,6 +68,7 @@ export class SchoolScheduleCard extends LitElement {
 
   private _parseData(): DayData[] {
     const cfg = this._config || {}
+    const { tomorrow_after } = cfg
 
     const applyCourseFilter = (days: DayData[]): DayData[] => {
       if (!Array.isArray(days)) return []
@@ -110,7 +111,7 @@ export class SchoolScheduleCard extends LitElement {
     }
 
     if ((cfg as any).schedule && Array.isArray((cfg as any).schedule.days)) {
-      return applyHideSubjectsFilter(applyCourseFilter(normalizeData((cfg as any).schedule as any)))
+      return applyHideSubjectsFilter(applyCourseFilter(normalizeData((cfg as any).schedule as any, tomorrow_after)))
     }
 
     const entId = (cfg as any).entity
@@ -118,7 +119,7 @@ export class SchoolScheduleCard extends LitElement {
       const stObj = (this.hass as any).states[entId]
       const attrs = stObj.attributes || {}
       if (Array.isArray(attrs.days)) {
-        return applyHideSubjectsFilter(applyCourseFilter(normalizeData(attrs)))
+        return applyHideSubjectsFilter(applyCourseFilter(normalizeData(attrs, tomorrow_after)))
       }
     }
     return []
@@ -172,28 +173,7 @@ export class SchoolScheduleCard extends LitElement {
 
     const days = this._parseData()
     let day: DayData | undefined
-    let targetDate: Date
-
-    const parseCutoff = (hhmm?: string) => {
-      const m = String(hhmm || '').match(/^(\d{1,2}):(\d{2})$/)
-      const now = new Date()
-      if (!m) return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-      const hh = Math.max(0, Math.min(23, parseInt(m[1], 10)))
-      const mm = Math.max(0, Math.min(59, parseInt(m[2], 10)))
-      return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0)
-    }
-    const now = new Date()
-    const cutoff = parseCutoff(tomorrow_after)
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const weekday = (today.getDay() + 6) % 7
-
-    if (weekday === 5 || weekday === 6 || (weekday === 4 && now >= (cutoff as Date))) {
-      targetDate = new Date(today.getTime() + (7 - weekday) * 86400000)
-    } else if (now >= (cutoff as Date)) {
-      targetDate = new Date(today.getTime() + 86400000)
-    } else {
-      targetDate = today
-    }
+    const targetDate: Date = getTargetDate(tomorrow_after)
 
     if ((view || 'week') === 'day') {
       const byDate = (arr: DayData[], dt: Date) =>
@@ -239,12 +219,10 @@ export class SchoolScheduleCard extends LitElement {
           return da - db
         })
 
-      const toRender = weekDays.length > 0 ? weekDays : days
-
       const targetISO = toISODateLocal(targetDate)
       return html`
         <div class="grid">
-          ${toRender.map(
+          ${(weekDays || []).map(
             (dobj) => html`<ssc-day-card
               class="view-${view} ${dobj.date === targetISO ? 'is-target' : ''}"
               data-date="${dobj.date || ''}"

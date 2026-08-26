@@ -80,7 +80,7 @@ export function getTargetDate(tomorrow_after?: string): Date{
     }
     const now = new Date()
     const cutoff = parseCutoff(tomorrow_after)
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 1)
     const weekday = (today.getDay() + 6) % 7
 
     if (weekday === 5 || weekday === 6 || (weekday === 4 && now >= (cutoff as Date))) {

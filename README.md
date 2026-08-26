@@ -28,14 +28,30 @@ Image preview:
 ## Installation
 
 ### Via HACS (recommended)
-1. Add this repository as a custom repository in HACS (category: “Lovelace”/“Dashboard”).
-2. Install it.
-3. Restart Home Assistant.
-4. Check under Settings → Dashboards → Resources that the following resource exists:
+1. HACS → three-dot menu → *Custom repositories* → add
+   `https://github.com/koslo/school-schedule-card` with category **Dashboard**.
+2. Download it, then restart Home Assistant.
+3. Register the resource:
    - URL: /hacsfiles/school-schedule-card/school-schedule-card.js
    - Type: Module
 
-HACS takes the file from `dist/school-schedule-card.js` (see `hacs.json`).
+   In storage mode HACS adds this entry itself; verify it under
+   Settings → Dashboards → Resources. If your Lovelace runs in YAML mode
+   (`lovelace: resource_mode: yaml`, or a dashboard with `mode: yaml`), HACS
+   logs *"YAML mode detected, can not update resources"* and adds nothing, so
+   put it in `configuration.yaml` yourself:
+
+   ```yaml
+   lovelace:
+     resources:
+       - url: /hacsfiles/school-schedule-card/school-schedule-card.js
+         type: module
+   ```
+4. Coming from a manual install? Delete the old `.js` file and its old resource
+   entry, otherwise the card is loaded twice.
+
+`hacs.json` declares the bare file name; HACS finds it in `dist/` and serves it
+under `/hacsfiles/school-schedule-card/`.
 
 ### Manual
 1. Copy the content of `dist/` to `<config>/www/community/school-schedule-card/` (create the folder if needed).
@@ -291,14 +307,30 @@ Bildvorschau:
 ## Installation
 
 ### Über HACS (empfohlen)
-1. Repository als benutzerdefiniertes Repository in HACS hinzufügen (Kategorie: „Lovelace“/„Dashboard“).
-2. Installieren.
-3. Home Assistant neu starten.
-4. Unter Einstellungen → Dashboards → Ressourcen prüfen, dass folgende Ressource vorhanden ist:
+1. HACS → Drei-Punkt-Menü → *Benutzerdefinierte Repositories* →
+   `https://github.com/koslo/school-schedule-card` mit Kategorie **Dashboard** hinzufügen.
+2. Herunterladen, danach Home Assistant neu starten.
+3. Ressource eintragen:
    - URL: /hacsfiles/school-schedule-card/school-schedule-card.js
    - Typ: Modul
 
-HACS nimmt die Datei aus `dist/school-schedule-card.js` (siehe `hacs.json`).
+   Im Storage-Modus legt HACS den Eintrag selbst an; prüfen unter
+   Einstellungen → Dashboards → Ressourcen. Läuft Lovelace im YAML-Modus
+   (`lovelace: resource_mode: yaml` oder ein Dashboard mit `mode: yaml`), loggt
+   HACS *"YAML mode detected, can not update resources"* und legt nichts an —
+   dann gehört der Eintrag von Hand in die `configuration.yaml`:
+
+   ```yaml
+   lovelace:
+     resources:
+       - url: /hacsfiles/school-schedule-card/school-schedule-card.js
+         type: module
+   ```
+4. Vorher manuell installiert? Alte `.js`-Datei und alten Ressourcen-Eintrag
+   entfernen, sonst wird die Karte doppelt geladen.
+
+`hacs.json` gibt nur den reinen Dateinamen an; HACS findet ihn in `dist/` und
+liefert ihn unter `/hacsfiles/school-schedule-card/` aus.
 
 ### Manuell
 1. Den Inhalt des Ordners `dist/` nach `<config>/www/community/school-schedule-card/` kopieren (Ordner ggf. anlegen).

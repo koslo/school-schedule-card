@@ -21,7 +21,7 @@ Image preview:
 - Filters: show only certain courses (whitelist) and/or hide subjects/courses (blacklist)
 - Compact “dense” mode for narrow displays
 - Subject color accents (configurable in code)
-- Supports newer sensor keys (e.g., st/beginn/ende/fa/le/ra/if/ku)
+- Accepts both the normalized keys (period/time/end/subject/teacher/room/info/isCourse) and the older short keys (st/beginn/ende/fa/le/ra/if/ku)
 
 ---
 
@@ -187,6 +187,7 @@ Weekday detection: If the date is missing, the weekday is derived from the name 
 - tomorrow_after: HH:MM – In day view, show “tomorrow” after this time. If it falls on Fri/Sun, it jumps to next Monday.
 - courses: List of course names (whitelist). Only course entries (ku=true) with a matching first word in the info text or the subject name are shown.
 - hide_subjects: List of subjects/courses (blacklist). Entries whose subject (or the first word from info if subject is empty/"---") is in this list will be hidden.
+- subject_colors: Map of subject short code to `{bg, fg}` colors, overriding the built-in table entry by entry. Keys are case-sensitive.
 - dense: Compact display mode (reduced paddings, tighter notes).
 
 ---
@@ -198,15 +199,15 @@ The card now supports multiple languages. It automatically follows your Home Ass
 - How it works: A lightweight translator is used in the card. When HA language changes, the card re-renders with the appropriate strings (e.g., "No lessons", "Daily notes", "Last update").
 - Configuration: No additional configuration is required. You can still set a custom title via the `title` option to override the default localized header shown in the initial placeholder.
 
-If you want to contribute another language, add translations to `src/i18n.js` and create a PR.
+If you want to contribute another language, add translations to `src/i18n.ts` and create a PR.
 
 ## Project structure
 - `src/` – Modularized source code
-  - `constants.js` – CARD_TAG, defaults, color table
-  - `utils.js` – Parsers/helpers (normalization, dates, formatting)
-  - `render.js` – Rendering functions for daily contents
-  - `card.js` – Web component (custom element)
-  - `main.js` – Registration (customElements + window.customCards)
+  - `constants.ts` – CARD_TAG, defaults, color table
+  - `utils.ts` – Parsers/helpers (normalization, dates, formatting)
+  - `render.ts` – Rendering functions for daily contents
+  - `card.ts` – Web component (custom element)
+  - `main.ts` – Registration (customElements + window.customCards)
   - `styles/`
     - `styles.scss` – Source styles (SCSS)
     - `styles.css` – Compiled styles (generated at build)
@@ -267,7 +268,10 @@ MIT
 
 Moderne, responsive Lovelace-Karte für Schulstundenpläne. Dieses Repository ist HACS‑kompatibel (Kategorie: Dashboard/Lovelace). Die Karte rendert Schulstunden (inkl. Vertretungen, Hinweise und Aktualisierungsstand) aus einer Sensor‑Entität oder einer Inline‑Konfiguration.
 
-Bildvorschau: siehe README.png im Projektroot.
+Bildvorschau:  
+![screenshot-1.png](screenshot/screenshot-1.png)  
+![screenshot-2.png](screenshot/screenshot-2.png)  
+![screenshot-3.png](screenshot/screenshot-3.png)  
 
 ---
 
@@ -280,7 +284,7 @@ Bildvorschau: siehe README.png im Projektroot.
 - Filter für Kurse (Whitelist) und zum Ausblenden von Fächern/Kursen (Blacklist)
 - Kompakter „dense“-Modus für schmale Displays
 - Farb‑Akzente pro Fach (konfigurierbar im Code)
-- Unterstützung neuer Sensordaten‑Schlüssel (z. B. st/beginn/ende/fa/le/ra/if/ku)
+- Nimmt sowohl die normalisierten Schlüssel (period/time/end/subject/teacher/room/info/isCourse) als auch die alten Kurzschlüssel (st/beginn/ende/fa/le/ra/if/ku)
 
 ---
 
@@ -342,6 +346,20 @@ hide_subjects:
   - mat
   - sport
 ```
+
+Fachfarben über die Konfiguration setzen (Standardfarben überschreiben):
+```yaml
+type: custom:school-schedule-card
+entity: sensor.dein_stundenplan_sensor
+subject_colors:
+  Mat: { bg: '#0000ff', fg: '#ffffff' }
+  Deu: { bg: '#ff00ff', fg: '#000000' }
+  Bio:
+    bg: '#228B22'
+    fg: '#ffffff'
+  # Schlüssel müssen den Fachkürzeln in deinen Daten entsprechen (case-sensitiv)
+```
+Ist ein Fach nicht in subject_colors enthalten, gelten die eingebauten Standardfarben.
 
 Inline‑Daten statt Entity (höchste Priorität):
 ```yaml
@@ -432,17 +450,27 @@ Wochentagserkennung: Wenn Datum fehlt, wird aus dem Namen (de/en) der Wochentag 
 - tomorrow_after: HH:MM – In der Tagesansicht wird nach dieser Zeit „morgen“ angezeigt. Fällt Fr/So hinein, wird bis zum nächsten Montag gesprungen.
 - courses: Liste von Kursnamen (Whitelist). Nur Kurs‑Einträge (ku=true) mit passendem ersten Wort im info‑Text oder dem Fachnamen werden angezeigt.
 - hide_subjects: Liste von Fächern/Kursen (Blacklist). Einträge, deren Fach (oder erstes Wort aus info, wenn Fach leer/„---“) in dieser Liste enthalten ist, werden ausgeblendet.
+- subject_colors: Zuordnung von Fachkürzel zu `{bg, fg}`-Farben, die die eingebaute Tabelle eintragsweise überschreibt. Die Schlüssel sind case-sensitiv.
 - dense: Kompakter Darstellungsmodus (reduzierte Abstände, kompaktere Hinweise).
 
 ---
 
+## Internationalisierung (i18n)
+Die Karte unterstützt mehrere Sprachen und folgt automatisch der Sprache von Home Assistant (hass.language bzw. hass.locale.language).
+
+- Unterstützte Sprachen: en, de
+- Funktionsweise: In der Karte steckt ein leichtgewichtiger Übersetzer. Wechselt die HA-Sprache, rendert die Karte mit den passenden Texten neu (etwa „Keine Stunden“, „Tägliche Hinweise“, „Letzte Aktualisierung“).
+- Konfiguration: Nichts weiter nötig. Über die Option `title` lässt sich die lokalisierte Standard-Kopfzeile weiterhin überschreiben.
+
+Für eine weitere Sprache die Übersetzungen in `src/i18n.ts` ergänzen und einen PR aufmachen.
+
 ## Projektstruktur
 - `src/` – Modularisierter Quellcode
-  - `constants.js` – CARD_TAG, Defaults, Farbtabelle
-  - `utils.js` – Parser/Helfer (Normalisierung, Datum, Formatierung)
-  - `render.js` – Rendering‑Funktionen für Tagesinhalte
-  - `card.js` – Web Component (Custom Element)
-  - `main.js` – Registrierung (customElements + window.customCards)
+  - `constants.ts` – CARD_TAG, Defaults, Farbtabelle
+  - `utils.ts` – Parser/Helfer (Normalisierung, Datum, Formatierung)
+  - `render.ts` – Rendering‑Funktionen für Tagesinhalte
+  - `card.ts` – Web Component (Custom Element)
+  - `main.ts` – Registrierung (customElements + window.customCards)
   - `styles/`
     - `styles.scss` – Quell‑Styles (SCSS)
     - `styles.css` – kompilierte Styles (wird beim Build erzeugt)
